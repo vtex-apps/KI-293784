@@ -1,6 +1,7 @@
 $(document).ready(function () {
-  const style = document.createElement("style");
-  style.innerHTML = `
+  function setLoadingStyles() {
+    const style = document.createElement("style");
+    style.innerHTML = `
   #spinner {
     border: 4px solid rgba(0, 0, 0, 0.1);
     width: 36px;
@@ -21,7 +22,8 @@ $(document).ready(function () {
     }
   }
   `;
-  document.head.appendChild(style);
+    document.head.appendChild(style);
+  }
 
   function addLoading() {
     const scheduledDeliveryList = document.querySelector(
@@ -32,7 +34,7 @@ $(document).ready(function () {
     spinner.setAttribute("id", "spinner");
     scheduledDeliveryList.parentElement.append(spinner);
   }
-  
+
   function removeLoading() {
     const scheduledDeliveryList = document.querySelector(
       ".vtex-omnishipping-1-x-scheduledDeliveryList"
@@ -41,7 +43,7 @@ $(document).ready(function () {
     const spinnerElement = document.querySelectorAll("#spinner");
     spinnerElement.forEach((e) => e.remove());
   }
-  
+
   function changeDeliveryWindow() {
     vtexjs.checkout
       .getOrderForm()
@@ -69,7 +71,6 @@ $(document).ready(function () {
         return null;
       })
       .done(function () {
-        console.log("Done");
         const schedulerTongle = document.querySelector(
           "#scheduled-delivery-delivery"
         );
@@ -82,43 +83,80 @@ $(document).ready(function () {
             schedulerTongle.click();
             removeLoading();
           }, 1000);
+        } else {
+          removeLoading();
         }
       });
   }
 
-  
+  function addSchedulerObserver() {
+    const observerScheduler = new MutationObserver((mutations, obsS) => {
+      const schedulerTongle = document.querySelector(
+        "#scheduled-delivery-delivery"
+      );
 
-  const observerScheduler = new MutationObserver((mutations, obsS) => {
-    const schedulerTongle = document.querySelector(
-      "#scheduled-delivery-delivery"
-    );
+      if (document.contains(schedulerTongle)) {
+        schedulerTongle.addEventListener("mousedown", function () {
+          if (
+            schedulerTongle.classList.contains(
+              "vtex-omnishipping-1-x-scheduleActive"
+            )
+          ) {
+            //console.log("Apagar");
+            changeDeliveryWindow();
+          }
+          /*else {
+            console.log("Prender");
+            //volver a poner fechas cargadas
+          }*/
+        });
 
-    if (document.contains(schedulerTongle)) {
-      console.log("scheduler found");
+        obsS.disconnect();
 
-      schedulerTongle.addEventListener("mousedown", function () {
+        return;
+      }
+    });
+
+    observerScheduler.observe(document, {
+      childList: true,
+      subtree: true,
+    });
+  }
+
+  function addDeliveryObserver() {
+    let isActiveObserverScheduler = false;
+
+    const observerDelivery = new MutationObserver((mutations, obsD) => {
+      const deliveryOption = document.querySelectorAll(
+        "#shipping-option-delivery"
+      )[0];
+      if (document.contains(deliveryOption)) {
         if (
-          schedulerTongle.classList.contains(
-            "vtex-omnishipping-1-x-scheduleActive"
+          deliveryOption.classList.contains(
+            "vtex-omnishipping-1-x-deliveryOptionActive"
           )
         ) {
-          console.log("Apagar");
-
-          changeDeliveryWindow();
+          if (!isActiveObserverScheduler) {
+            isActiveObserverScheduler = true;
+            addSchedulerObserver();
+          }
         } else {
-          console.log("Prender");
-          //volver a poner fechas cargadas
+          isActiveObserverScheduler = false;
         }
-      });
 
-      obsS.disconnect();
+        /*obsD.disconnect();
+              return;*/
+      } else {
+        isActiveObserverScheduler = false;
+      }
+    });
+    observerDelivery.observe(document, {
+      childList: true,
+      subtree: true,
+    });
+  }
 
-      return;
-    }
-  });
-
-  observerScheduler.observe(document, {
-    childList: true,
-    subtree: true,
-  });
+  setLoadingStyles();
+  //addDeliveryObserver();
+  addSchedulerObserver();
 });
