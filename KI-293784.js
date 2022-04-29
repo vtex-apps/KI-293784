@@ -51,26 +51,31 @@ $(document).ready(function () {
         var shippingData = orderForm.shippingData;
         const selectedSla = shippingData.logisticsInfo[0].selectedSla;
         var hasDeliveryWindow = false;
-        shippingData.logisticsInfo[0].slas.forEach((sla) => {
-          if (sla.id === selectedSla) {
-            if (sla.deliveryWindow) {
-              sla.deliveryWindow = null;
-              hasDeliveryWindow = true;
+        shippingData.logisticsInfo.forEach((logisticsInfo) => {
+          logisticsInfo.slas.forEach((sla) => {
+            if (sla.id === selectedSla) {
+              if (sla.deliveryWindow) {
+                sla.deliveryWindow = null;
+                hasDeliveryWindow = true;
+              }
             }
-          }
+          });
         });
 
         if (hasDeliveryWindow) {
           addLoading();
-          shippingData.logisticsInfo[0] = {
-            ...shippingData.logisticsInfo[0],
-            selectedSla: null,
-          };
+          shippingData.logisticsInfo = shippingData.logisticsInfo.map((logisticsInfo) => {
+            return {
+              ...logisticsInfo,
+              selectedSla: null,
+            };
+          });
+
           return vtexjs.checkout.sendAttachment("shippingData", shippingData);
         }
         return null;
       })
-      .done(function () {
+      .done(function (orderForm) {
         const schedulerTongle = document.querySelector(
           "#scheduled-delivery-delivery"
         );
