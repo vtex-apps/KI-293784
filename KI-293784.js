@@ -87,7 +87,7 @@ $(document).ready(function () {
           setTimeout(() => {
             schedulerTongle.click();
             removeLoading();
-          }, 1000);
+          }, 1500);
         } else {
           removeLoading();
         }
