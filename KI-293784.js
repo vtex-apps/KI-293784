@@ -64,12 +64,14 @@ $(document).ready(function () {
 
         if (hasDeliveryWindow) {
           addLoading();
-          shippingData.logisticsInfo = shippingData.logisticsInfo.map((logisticsInfo) => {
-            return {
-              ...logisticsInfo,
-              selectedSla: null,
-            };
-          });
+          shippingData.logisticsInfo = shippingData.logisticsInfo.map(
+            (logisticsInfo) => {
+              return {
+                ...logisticsInfo,
+                selectedSla: null,
+              };
+            }
+          );
 
           return vtexjs.checkout.sendAttachment("shippingData", shippingData);
         }
@@ -94,6 +96,40 @@ $(document).ready(function () {
       });
   }
 
+  function addFakeDeliveyWindow() {
+    vtexjs.checkout
+      .getOrderForm()
+      .then((orderForm) => {
+        var shippingData = orderForm.shippingData;
+        const selectedSla = shippingData.logisticsInfo[0].selectedSla;
+        var hasDeliveryWindow = false;
+        shippingData.logisticsInfo.forEach((logisticsInfo) => {
+          logisticsInfo.slas.forEach((sla) => {
+            if (sla.id === selectedSla) {
+              if (!sla.deliveryWindow) {
+                const deliveryTest = {
+                  courierId: null,
+                  courierName: null,
+                  dockId: null,
+                  kitItemDetails: [],
+                  quantity: 0,
+                  warehouseId: null,
+                };
+
+                sla.deliveryWindow = [deliveryTest];
+                hasDeliveryWindow = true;
+              }
+            }
+          });
+        });
+
+        return vtexjs.checkout.sendAttachment("shippingData", shippingData);
+      })
+      .done(function () {
+        console.log("Done addFakeDeliveyWindow");
+      });
+  }
+
   function addSchedulerObserver() {
     const observerScheduler = new MutationObserver((mutations, obsS) => {
       const schedulerTongle = document.querySelector(
@@ -109,11 +145,10 @@ $(document).ready(function () {
           ) {
             console.log("Apagar");
             changeDeliveryWindow();
-          }
-          else {
+          } else {
             console.log("Prender");
             //Poner loading
-            test();
+            addFakeDeliveyWindow();
             //volver a poner fechas cargadas
           }
         });
@@ -163,51 +198,6 @@ $(document).ready(function () {
     });
   }
 
-  function test() {
-    vtexjs.checkout
-  .getOrderForm()
-  .then((orderForm) => {
-    var shippingData = orderForm.shippingData;
-    const selectedSla = shippingData.logisticsInfo[0].selectedSla;
-    var hasDeliveryWindow = false;
-    shippingData.logisticsInfo.forEach((logisticsInfo) => {
-      logisticsInfo.slas.forEach((sla) => {
-        if (sla.id === selectedSla) {
-          if (!sla.deliveryWindow) {
-            const deliveryTest = {
-              courierId: "Delivery-Express-Vtex",
-              courierName: "Delivery Express Prueba VTEX",
-              dockId: "1",
-              kitItemDetails: [],
-              quantity: 1,
-              warehouseId: "504",
-            };
-
-            sla.deliveryWindow = [deliveryTest];
-            hasDeliveryWindow = true;
-          }
-        }
-      });
-    });
-
-    if (hasDeliveryWindow) {
-      shippingData.logisticsInfo = shippingData.logisticsInfo.map(
-        (logisticsInfo) => {
-          return {
-            ...logisticsInfo,
-            //selectedSla: null,
-          };
-        }
-      );
-
-      return vtexjs.checkout.sendAttachment("shippingData", shippingData);
-    }
-    return null;
-  })
-  .done(function (orderForm) {
-    console.log("Done", orderForm);
-  });
-  }
   setLoadingStyles();
   //addDeliveryObserver();
   addSchedulerObserver();
