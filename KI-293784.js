@@ -25,7 +25,7 @@ $(document).ready(function () {
     document.head.appendChild(style);
   }
 
-  function addLoading() {
+  function addLoadingApagar() {
     const scheduledDeliveryList = document.querySelector(
       ".vtex-omnishipping-1-x-scheduledDeliveryList"
     );
@@ -35,11 +35,92 @@ $(document).ready(function () {
     scheduledDeliveryList.parentElement.append(spinner);
   }
 
-  function removeLoading() {
+  function removeLoadingApagar() {
     const scheduledDeliveryList = document.querySelector(
       ".vtex-omnishipping-1-x-scheduledDeliveryList"
     );
     scheduledDeliveryList.classList.remove("vtex-omnishipping-1-x-hide");
+    const spinnerElement = document.querySelectorAll("#spinner");
+    spinnerElement.forEach((e) => e.remove());
+  }
+
+  function addLoadingPrender() {
+    setTimeout(() => {
+      console.log("addLoadingPrender");
+      const titles = [
+        ...document.querySelectorAll(
+          ".vtex-omnishipping-1-x-shippingSectionTitle"
+        ),
+      ];
+      console.log("titles", titles);
+      if (titles.length > 3) {
+        const titlesToHide = titles.splice(titles.length - 2, titles.length);
+        console.log("titlesToHide", titlesToHide);
+
+        titlesToHide.forEach((title) => {
+          title.classList.add("vtex-omnishipping-1-x-hide");
+        });
+        const glideContainer = document.querySelector(".glide-container");
+        console.log("glideContainer", glideContainer);
+
+        if (document.contains(glideContainer)) {
+          glideContainer.classList.add("vtex-omnishipping-1-x-hide");
+        }
+
+        const deliveryPackagesOptions = document.querySelector(
+          "#delivery-packages-options"
+        );
+        console.log("deliveryPackagesOptions", deliveryPackagesOptions);
+
+        if (document.contains(deliveryPackagesOptions)) {
+          deliveryPackagesOptions.classList.add("vtex-omnishipping-1-x-hide");
+        }
+
+        const scheduledDelivery = document.querySelector(
+          ".vtex-omnishipping-1-x-scheduledDelivery"
+        );
+
+        const spinner = document.createElement("div");
+        spinner.setAttribute("id", "spinner");
+        scheduledDelivery.parentElement.append(spinner);
+      }
+    }, 100);
+  }
+
+  function removeLoadingPrender() {
+    const titles = [
+      ...document.querySelectorAll(
+        ".vtex-omnishipping-1-x-shippingSectionTitle"
+      ),
+    ];
+
+    titles.forEach((title) => {
+      if (title.classList.contains("vtex-omnishipping-1-x-hide")) {
+        title.classList.remove("vtex-omnishipping-1-x-hide");
+      }
+    });
+    const glideContainer = document.querySelector(".glide-container");
+    console.log("glideContainer", glideContainer);
+
+    if (
+      document.contains(glideContainer) &&
+      glideContainer.classList.contains("vtex-omnishipping-1-x-hide")
+    ) {
+      glideContainer.classList.add("vtex-omnishipping-1-x-hide");
+    }
+
+    const deliveryPackagesOptions = document.querySelector(
+      "#delivery-packages-options"
+    );
+    console.log("deliveryPackagesOptions", deliveryPackagesOptions);
+
+    if (
+      document.contains(deliveryPackagesOptions) &&
+      deliveryPackagesOptions.classList.contains("vtex-omnishipping-1-x-hide")
+    ) {
+      deliveryPackagesOptions.classList.add("vtex-omnishipping-1-x-hide");
+    }
+
     const spinnerElement = document.querySelectorAll("#spinner");
     spinnerElement.forEach((e) => e.remove());
   }
@@ -63,7 +144,7 @@ $(document).ready(function () {
         });
 
         if (hasDeliveryWindow) {
-          addLoading();
+          addLoadingApagar();
           shippingData.logisticsInfo = shippingData.logisticsInfo.map(
             (logisticsInfo) => {
               return {
@@ -88,10 +169,10 @@ $(document).ready(function () {
         ) {
           setTimeout(() => {
             schedulerTongle.click();
-            removeLoading();
+            removeLoadingApagar();
           }, 1500);
         } else {
-          removeLoading();
+          removeLoadingApagar();
         }
       });
   }
@@ -102,31 +183,34 @@ $(document).ready(function () {
       .then((orderForm) => {
         var shippingData = orderForm.shippingData;
         const selectedSla = shippingData.logisticsInfo[0].selectedSla;
-        var hasDeliveryWindow = false;
-        shippingData.logisticsInfo.forEach((logisticsInfo) => {
-          logisticsInfo.slas.forEach((sla) => {
-            if (sla.id === selectedSla) {
-              if (!sla.deliveryWindow) {
-                const deliveryTest = {
-                  courierId: null,
-                  courierName: null,
-                  dockId: null,
-                  kitItemDetails: [],
-                  quantity: 0,
-                  warehouseId: null,
-                };
+        if (shippingData.logisticsInfo.length > 1) {
+          shippingData.logisticsInfo.forEach((logisticsInfo) => {
+            logisticsInfo.slas.forEach((sla) => {
+              if (sla.id === selectedSla) {
+                if (!sla.deliveryWindow) {
+                  const deliveryTest = {
+                    courierId: null,
+                    courierName: null,
+                    dockId: null,
+                    kitItemDetails: [],
+                    quantity: 0,
+                    warehouseId: null,
+                  };
 
-                sla.deliveryWindow = [deliveryTest];
-                hasDeliveryWindow = true;
+                  sla.deliveryWindow = [deliveryTest];
+                  hasDeliveryWindow = true;
+                }
               }
-            }
+            });
           });
-        });
 
-        return vtexjs.checkout.sendAttachment("shippingData", shippingData);
+          return vtexjs.checkout.sendAttachment("shippingData", shippingData);
+        }
+        return null;
       })
       .done(function () {
         console.log("Done addFakeDeliveyWindow");
+        removeLoadingPrender()
       });
   }
 
@@ -147,9 +231,8 @@ $(document).ready(function () {
             changeDeliveryWindow();
           } else {
             console.log("Prender");
-            //Poner loading
+            addLoadingPrender();
             addFakeDeliveyWindow();
-            //volver a poner fechas cargadas
           }
         });
 
