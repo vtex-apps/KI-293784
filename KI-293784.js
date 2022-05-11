@@ -2,6 +2,12 @@ $(document).ready(function () {
   function setLoadingStyles() {
     const style = document.createElement("style");
     style.innerHTML = `
+  #containerSpinner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
   #spinner {
     border: 4px solid rgba(0, 0, 0, 0.1);
     width: 36px;
@@ -79,10 +85,13 @@ $(document).ready(function () {
         const scheduledDelivery = document.querySelector(
           ".vtex-omnishipping-1-x-scheduledDelivery"
         );
-
+        
+        const containerSpinner = document.createElement("div");
+        containerSpinner.setAttribute("id", "containerSpinner");
         const spinner = document.createElement("div");
         spinner.setAttribute("id", "spinner");
-        scheduledDelivery.parentElement.append(spinner);
+        containerSpinner.append(spinner);
+        scheduledDelivery.parentElement.append(containerSpinner);
       }
     }, 100);
   }
