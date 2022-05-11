@@ -130,9 +130,10 @@ $(document).ready(function () {
       .getOrderForm()
       .then((orderForm) => {
         var shippingData = orderForm.shippingData;
-        const selectedSla = shippingData.logisticsInfo[0].selectedSla;
         var hasDeliveryWindow = false;
         shippingData.logisticsInfo.forEach((logisticsInfo) => {
+          console.log("logisticsInfo", logisticsInfo);
+          const selectedSla = logisticsInfo.selectedSla;
           logisticsInfo.slas.forEach((sla) => {
             if (sla.id === selectedSla) {
               if (sla.deliveryWindow) {
@@ -182,9 +183,9 @@ $(document).ready(function () {
       .getOrderForm()
       .then((orderForm) => {
         var shippingData = orderForm.shippingData;
-        const selectedSla = shippingData.logisticsInfo[0].selectedSla;
         if (shippingData.logisticsInfo.length > 1) {
           shippingData.logisticsInfo.forEach((logisticsInfo) => {
+            const selectedSla = logisticsInfo.selectedSla;
             logisticsInfo.slas.forEach((sla) => {
               if (sla.id === selectedSla) {
                 if (!sla.deliveryWindow) {
@@ -210,7 +211,7 @@ $(document).ready(function () {
       })
       .done(function () {
         console.log("Done addFakeDeliveyWindow");
-        removeLoadingPrender()
+        removeLoadingPrender();
       });
   }
 
@@ -248,6 +249,7 @@ $(document).ready(function () {
     });
   }
 
+  /*
   function addDeliveryObserver() {
     let isActiveObserverScheduler = false;
 
@@ -268,9 +270,6 @@ $(document).ready(function () {
         } else {
           isActiveObserverScheduler = false;
         }
-
-        /*obsD.disconnect();
-              return;*/
       } else {
         isActiveObserverScheduler = false;
       }
@@ -279,7 +278,7 @@ $(document).ready(function () {
       childList: true,
       subtree: true,
     });
-  }
+  }*/
 
   setLoadingStyles();
   //addDeliveryObserver();
