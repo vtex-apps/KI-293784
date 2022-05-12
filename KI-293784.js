@@ -51,6 +51,7 @@ $(document).ready(function () {
   }
 
   function addLoadingPrender() {
+    //console.log("addLoadingPrender");
     setTimeout(() => {
       const titles = [
         ...document.querySelectorAll(
@@ -99,6 +100,7 @@ $(document).ready(function () {
   }
 
   function removeLoadingPrender() {
+    //console.log("removeLoadingPrender");
     const titles = [
       ...document.querySelectorAll(
         ".vtex-omnishipping-1-x-shippingSectionTitle"
@@ -145,16 +147,17 @@ $(document).ready(function () {
   }
 
   function changeDeliveryWindow() {
-    console.log('changeDeliveryWindow()');
+    //console.log("changeDeliveryWindow()");
     vtexjs.checkout
       .getOrderForm()
       .then((orderForm) => {
         var shippingData = orderForm.shippingData;
         var hasDeliveryWindow = false;
         shippingData.logisticsInfo.forEach((logisticsInfo) => {
-          console.log('logisticsInfo', logisticsInfo);
+          //console.log("logisticsInfo", logisticsInfo);
           const selectedSla = logisticsInfo.selectedSla;
           logisticsInfo.slas.forEach((sla) => {
+            //console.log("sla.deliveryWindow ", sla.deliveryWindow );
             if (sla.id === selectedSla) {
               if (sla.deliveryWindow) {
                 sla.deliveryWindow = null;
@@ -165,7 +168,7 @@ $(document).ready(function () {
         });
 
         if (hasDeliveryWindow) {
-          console.log('hasDeliveryWindow');
+          //console.log("hasDeliveryWindow");
           addLoadingApagar();
           shippingData.logisticsInfo = shippingData.logisticsInfo.map(
             (logisticsInfo) => {
@@ -200,6 +203,7 @@ $(document).ready(function () {
   }
 
   function addFakeDeliveyWindow() {
+    //console.log("addFakeDeliveyWindow()");
     vtexjs.checkout
       .getOrderForm()
       .then((orderForm) => {
@@ -235,6 +239,31 @@ $(document).ready(function () {
       });
   }
 
+  function removeFakeDeliveyWindow() {
+    vtexjs.checkout
+      .getOrderForm()
+      .then((orderForm) => {
+        var shippingData = orderForm.shippingData;
+        if (shippingData.logisticsInfo.length > 1) {
+          shippingData.logisticsInfo.forEach((logisticsInfo) => {
+            const selectedSla = logisticsInfo.selectedSla;
+            logisticsInfo.slas.forEach((sla) => {
+              if (sla.id === selectedSla) {
+                sla.deliveryWindow = null;
+                hasDeliveryWindow = true;
+              }
+            });
+          });
+
+          return vtexjs.checkout.sendAttachment("shippingData", shippingData);
+        }
+        return null;
+      })
+      .done(function () {
+        removeLoadingPrender();
+      });
+  }
+
   function addSchedulerObserver() {
     const observerScheduler = new MutationObserver((mutations, obsS) => {
       const schedulerTongle = document.querySelector(
@@ -248,12 +277,13 @@ $(document).ready(function () {
               "vtex-omnishipping-1-x-scheduleActive"
             )
           ) {
-            console.log("Apagar");
+            //console.log("Apagar");
             changeDeliveryWindow();
           } else {
-            console.log("Prender");
+            //console.log("Prender");
             addLoadingPrender();
             addFakeDeliveyWindow();
+            removeFakeDeliveyWindow();
           }
         });
 
