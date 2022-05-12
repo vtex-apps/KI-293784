@@ -52,22 +52,18 @@ $(document).ready(function () {
 
   function addLoadingPrender() {
     setTimeout(() => {
-      console.log("addLoadingPrender");
       const titles = [
         ...document.querySelectorAll(
           ".vtex-omnishipping-1-x-shippingSectionTitle"
         ),
       ];
-      console.log("titles", titles);
       if (titles.length > 3) {
         const titlesToHide = titles.splice(titles.length - 2, titles.length);
-        console.log("titlesToHide", titlesToHide);
 
         titlesToHide.forEach((title) => {
           title.classList.add("vtex-omnishipping-1-x-hide");
         });
         const glideContainer = document.querySelector(".glide-container");
-        console.log("glideContainer", glideContainer);
 
         if (document.contains(glideContainer)) {
           glideContainer.classList.add("vtex-omnishipping-1-x-hide");
@@ -76,16 +72,22 @@ $(document).ready(function () {
         const deliveryPackagesOptions = document.querySelector(
           "#delivery-packages-options"
         );
-        console.log("deliveryPackagesOptions", deliveryPackagesOptions);
 
         if (document.contains(deliveryPackagesOptions)) {
           deliveryPackagesOptions.classList.add("vtex-omnishipping-1-x-hide");
         }
 
+        const shpAlert = document.querySelector(
+          ".shp-alert.vtex-omnishipping-1-x-alert.shp-alert-delivery.shp-alert-schedule-unavailable"
+        );
+        if (document.contains(shpAlert)) {
+          shpAlert.classList.add("vtex-omnishipping-1-x-hide");
+        }
+
         const scheduledDelivery = document.querySelector(
           ".vtex-omnishipping-1-x-scheduledDelivery"
         );
-        
+
         const containerSpinner = document.createElement("div");
         containerSpinner.setAttribute("id", "containerSpinner");
         const spinner = document.createElement("div");
@@ -109,7 +111,6 @@ $(document).ready(function () {
       }
     });
     const glideContainer = document.querySelector(".glide-container");
-    console.log("glideContainer", glideContainer);
 
     if (
       document.contains(glideContainer) &&
@@ -121,7 +122,6 @@ $(document).ready(function () {
     const deliveryPackagesOptions = document.querySelector(
       "#delivery-packages-options"
     );
-    console.log("deliveryPackagesOptions", deliveryPackagesOptions);
 
     if (
       document.contains(deliveryPackagesOptions) &&
@@ -130,18 +130,29 @@ $(document).ready(function () {
       deliveryPackagesOptions.classList.add("vtex-omnishipping-1-x-hide");
     }
 
+    const shpAlert = document.querySelector(
+      ".shp-alert.vtex-omnishipping-1-x-alert.shp-alert-delivery.shp-alert-schedule-unavailable"
+    );
+    if (
+      document.contains(shpAlert) &&
+      shpAlert.classList.contains("vtex-omnishipping-1-x-hide")
+    ) {
+      shpAlert.classList.add("vtex-omnishipping-1-x-hide");
+    }
+
     const spinnerElement = document.querySelectorAll("#spinner");
     spinnerElement.forEach((e) => e.remove());
   }
 
   function changeDeliveryWindow() {
+    console.log('changeDeliveryWindow()');
     vtexjs.checkout
       .getOrderForm()
       .then((orderForm) => {
         var shippingData = orderForm.shippingData;
         var hasDeliveryWindow = false;
         shippingData.logisticsInfo.forEach((logisticsInfo) => {
-          console.log("logisticsInfo", logisticsInfo);
+          console.log('logisticsInfo', logisticsInfo);
           const selectedSla = logisticsInfo.selectedSla;
           logisticsInfo.slas.forEach((sla) => {
             if (sla.id === selectedSla) {
@@ -154,6 +165,7 @@ $(document).ready(function () {
         });
 
         if (hasDeliveryWindow) {
+          console.log('hasDeliveryWindow');
           addLoadingApagar();
           shippingData.logisticsInfo = shippingData.logisticsInfo.map(
             (logisticsInfo) => {
@@ -219,7 +231,6 @@ $(document).ready(function () {
         return null;
       })
       .done(function () {
-        console.log("Done addFakeDeliveyWindow");
         removeLoadingPrender();
       });
   }
