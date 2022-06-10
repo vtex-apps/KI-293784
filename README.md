@@ -1,4 +1,4 @@
-# KI-293784
+# [KI-293784] Delivery method selector does not appear in some scenarios
 This script solves the KI https://vtexhelp.zendesk.com/agent/tickets/293784
 
 You need to add the script to the checkout at the `checkout6-custom.js`.
